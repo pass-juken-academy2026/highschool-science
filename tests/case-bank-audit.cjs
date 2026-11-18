@@ -52,7 +52,7 @@ for (const subject of subjects) {
       if (!Number.isInteger(q[2]) || q[2] < 0 || q[2] > 3) errors.push(label + ': invalid answer index');
       if (typeof q[3] !== 'string' || !q[3].trim()) errors.push(label + ': missing explanation');
       else if (Array.isArray(q[1]) && q[1][q[2]] !== undefined) positions[q[2]]++;
-      const prompt = String(q[0] || '').normalize('NFKC').toLocaleLowerCase().replace(/\\s+/g, '');
+      const prompt = String(q[0] || '').normalize('NFKC').toLocaleLowerCase().replace(/\s+/g, '');
       if (prompt && prompts.has(prompt)) errors.push(label + ': duplicate prompt across case bank');
       prompts.add(prompt);
     }
@@ -63,7 +63,7 @@ if (!source.includes('function safeCaseFragment(') || !source.includes('article.
   errors.push('stimulus markup is not rendered through the allow-list sanitizer');
 }
 if (errors.length) {
-  console.error(errors.join('\\n'));
+  console.error(errors.join('\n'));
   process.exit(1);
 }
 console.log('Science case bank OK: five subjects, long stimuli, valid questions, balanced keys, and safe markup rendering.');
