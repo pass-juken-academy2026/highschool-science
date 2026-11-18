@@ -25,8 +25,31 @@ function extractObject(source, marker) {
 }
 
 const source = fs.readFileSync('index.html', 'utf8');
+const bank = extractObject(source, 'const bank=');
 const common = extractObject(source, 'const COMMON_EXTRA_CASES=');
 const mock = extractObject(source, 'const MOCK_CASE_BANKS=');
+const baseSubjects = ['bio', 'chem', 'phys', 'earth'];
+for (const subject of baseSubjects) {
+  const units = bank[subject] || {};
+  if (Object.keys(units).length !== 5) errors.push(subject + ': expected five topic banks');
+  for (const [unit, data] of Object.entries(units)) {
+    const label = subject + ' / basic ' + unit;
+    if (!Array.isArray(data.q) || data.q.length !== 4) errors.push(label + ': expected four basic questions');
+    const prompts = new Set();
+    const positions = [0, 0, 0, 0];
+    for (const q of data.q || []) {
+      if (!Array.isArray(q) || q.length < 4) { errors.push(label + ': malformed question'); continue; }
+      if (!Array.isArray(q[1]) || q[1].length !== 4) errors.push(label + ': expected four choices');
+      if (!Number.isInteger(q[2]) || q[2] < 0 || q[2] > 3) errors.push(label + ': invalid answer index');
+      if (!q[3] || !String(q[3]).trim()) errors.push(label + ': missing explanation');
+      if (Array.isArray(q[1]) && q[1][q[2]] !== undefined) positions[q[2]]++;
+      const prompt = String(q[0] || '').normalize('NFKC').toLocaleLowerCase().replace(/\\s+/g, '');
+      if (prompts.has(prompt)) errors.push(label + ': duplicate basic question');
+      prompts.add(prompt);
+    }
+    if (Math.max(...positions) - Math.min(...positions) > 2) errors.push(label + ': answer-position imbalance');
+  }
+}
 const subjects = ['bio', 'chem', 'phys', 'earth', 'basic4'];
 const errors = [];
 for (const subject of subjects) {
