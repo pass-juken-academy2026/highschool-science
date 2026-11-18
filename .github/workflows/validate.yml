@@ -94,3 +94,5 @@ jobs:
           PY
       - name: Check common-test stimulus continuity and answer data
         run: node tests/common-test-audit.cjs
+      - name: Check science case-bank data and safe stimulus rendering
+        run: node tests/case-bank-audit.cjs
